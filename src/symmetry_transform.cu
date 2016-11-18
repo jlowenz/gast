@@ -108,7 +108,7 @@ namespace gast {
     float maxC = 0;
     float maxTheta = 0;
     float alpha_ij = 0;
-    for (int j = min.y; j < max.y; j++) {
+    for (int j = min.y; j <= p.y; j++) {
       for (int i = min.x; i < max.x; i++) {
 	if (abs(i-p.x) < sigma ||
 	    abs(j-p.y) < sigma) continue;
