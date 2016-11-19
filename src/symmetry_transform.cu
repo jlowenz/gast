@@ -76,6 +76,8 @@ namespace gast {
     return (p.x >= 0 && p.x < cols && p.y >= 0 && p.y < rows);
   }
 
+  //__device__ inline 
+
   /*
     To compute the symmetry value for pixel p, we need to look at all
     the surrounding pixels (Gamma in the paper) in radius 3*sigma
@@ -91,7 +93,7 @@ namespace gast {
     int y = blockIdx.y * blockDim.y + threadIdx.y;
     //int x_radius = min(3 * sigma, min(x, mag.cols - x - 1));
     //int y_radius = min(3 * sigma, min(y, mag.rows - y - 1));
-    int radius = 3 * sigma;
+    int radius = (int)(2.5 * sigma);
     int ROWS = mag.rows;
     int COLS = mag.cols;
   
@@ -104,13 +106,15 @@ namespace gast {
     int2 pi, pj, d;
     float2 rtheta_i, rtheta_j;
     float M = 0;
+    float RS = 0;
     float C_ij = 0;
+    float psi_ij = 0;
     float maxC = 0;
     float maxTheta = 0;
     float alpha_ij = 0;
     for (int j = min.y; j <= p.y; j++) {
       for (int i = min.x; i < max.x; i++) {
-	if (abs(i-p.x) < sigma ||
+	if (abs(i-p.x) < sigma &&
 	    abs(j-p.y) < sigma) continue;
     	pi = make_int2(i,j);
     	if (pi == p) break; // we are done, since this computation is symmetric
@@ -121,12 +125,15 @@ namespace gast {
     	  rtheta_j = pt_gradient(mag, dir, pj);	
     	  alpha_ij = atan2f(pi.y - pj.y, pi.x - pj.x);
     	  C_ij = rtheta_i.x * rtheta_j.x * dist(pi, pj, (float)sigma) * 
-    	    phase(alpha_ij, rtheta_i.y, rtheta_j.y);
-    	  M += C_ij;	
+    	    phase(alpha_ij, rtheta_i.y, rtheta_j.y);	  
+    	  M += C_ij;
+	  psi_ij = (rtheta_i.y + rtheta_j.y) * 0.5;
     	  if (C_ij > maxC) {
     	    maxC = C_ij;
-    	    maxTheta = (rtheta_i.y + rtheta_j.y) * 0.5;
+    	    maxTheta = psi_ij;
     	  }
+	  float sin_phi = sin(psi_ij - maxTheta);
+	  RS += C_ij * (sin_phi * sin_phi);
     	}
       }
     }
@@ -140,7 +147,7 @@ namespace gast {
   {
     cv::gpu::createContinuous(mag.size(), CV_32F, smag);
     cv::gpu::createContinuous(mag.size(), CV_32F, sdir);
-    dim3 cthreads(32,8);
+    dim3 cthreads(16,16);
     dim3 cblocks(divUp(mag.cols,cthreads.x),
 		 divUp(mag.rows,cthreads.y));
     cudaStream_t cs = cv::gpu::StreamAccessor::getStream(s);
