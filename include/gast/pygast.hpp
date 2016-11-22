@@ -10,7 +10,7 @@ public:
   void transform(unsigned char* img, int irows, int icols,
 		 float* sym, int srows, int scols, 
 		 float* dir, int drows, int dcols, 
-		 int sigma = 30);
+		 int sigma = 7);
 private:
   symmetry_impl_t* state_;
 };
