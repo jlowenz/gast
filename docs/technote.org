@@ -1,0 +1,25 @@
+#+TITLE: GPU-Accelerated Symmetry Transform for Object Keypoints
+#+AUTHOR: Jason Owens
+#+OPTIONS: toc:nil
+#+STARTUP: hidestars
+#+LaTeX_HEADER: \usepackage[margin=1in]{geometry} \usepackage{ae,aecompl}
+* Introduction
+Finding salient object candidates in arbitrary natural images is a problem in computer vision and robotic perception that has yet to be solved. There are many ways this challenge is currently approached:
+
+- scan the entire image, at multiple scales, with some kind of object recognition algorithm, generating a heat map indicating the score or probability of a known, detected object (i.e. sliding window),
+- propose a smaller set of likely object regions based on some engineered or learned features of the image (e.g. edge boxes, geodesic object proposals, objectness),
+- compute a segmentation of the image to propose object-like regions,
+- learn a saliency function to predict regions of the image that may contain objects.
+
+In recent years and in combination with advanced deep learning systems for object recognition tasks, the use of object proposal algorithms has become almost a de-facto standard. As indicated, object proposal algorithms produce a significantly smaller of image regions to test than almost any other mechanism. The main idea is to either engineer or train a detector for what has been called the "objectness" of a region, i.e. how well that region reflects aspects of containing an object. Object aspects often include such properties as closed contours, convexity, and compactness. In the image domain, the contours can be reflected in the edges derived from the gradient image. 
+
+However, processing image contours without any additional information (e.g. learning an object contour prior) often yields undesirable results, with many proposals that do not represent an object. When we discuss objectness, we usually care about whole physical objeccts we can pick up (box of cereal, phone, pencil, flashlight, coffee mug) and not the aspects of an object's appearance that may also provide strong gradient edge responses. 
+
+# need to get to the point here regarding the object keypoints vs. object proposals
+
+In 1995, Reisfeld et al. proposed the use of a symmetry transform operator in the image domain to compute a symmetry transform for use as an attentional operator. 
+
+#+DOWNLOADED: file:///home/jlowens/Pictures/Screenshot%20from%202016-11-21%2017:35:23.png @ 2016-11-28 14:22:54
+#+CAPTION: Symmetry keypoints naively extracted from a symmetry transform
+[[file:Introduction/Screenshot%2520from%25202016-11-21%252017:35:23_2016-11-28_14:22:54.png]]
+
