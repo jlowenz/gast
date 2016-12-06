@@ -17,9 +17,14 @@ However, processing image contours without any additional information (e.g. lear
 
 # need to get to the point here regarding the object keypoints vs. object proposals
 
-In 1995, Reisfeld et al. proposed the use of a symmetry transform operator in the image domain to compute a symmetry transform for use as an attentional operator. 
+In 1995, Reisfeld et al. proposed the use of a symmetry transform operator in the image domain for use as an attentional operator. Reisfeld showed that by extracting contours from the symmetry magnitude and selecting local maxima, it was possible to compute attention keypoints that indicated important features of the image. For example, figure \ref{fig:salient-elvis} shows an example from \cite{reisfeld1995} where selecting the maximum output of the radial symmetry transform produces keypoints for the face of Nixon, the forehead of Elvis, as well as several interesting points on the flags. 
 
-#+DOWNLOADED: file:///home/jlowens/Pictures/Screenshot%20from%202016-11-21%2017:35:23.png @ 2016-11-28 14:22:54
+#+NAME: fig:salient-elvis
+#+ATTR_LATEX: :width 0.5\linewidth
+#+CAPTION: Salient keypoint extraction using symmetry magnitude, from Reisfeld 1995
+[[file:Introduction/elvis.png]]
+
+#+NAME: fig:naive-kps
 #+CAPTION: Symmetry keypoints naively extracted from a symmetry transform
-[[file:Introduction/Screenshot%2520from%25202016-11-21%252017:35:23_2016-11-28_14:22:54.png]]
+[[file:Introduction/naive-kps.png]]
 
