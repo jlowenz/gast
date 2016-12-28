@@ -2,8 +2,11 @@
 #+AUTHOR: Jason Owens
 #+OPTIONS: toc:nil
 #+STARTUP: hidestars
-#+LaTeX_HEADER: \usepackage[margin=1in]{geometry} \usepackage{ae,aecompl}
+#+LaTeX_HEADER: \usepackage[margin=1in]{geometry} \usepackage{ae,aecompl} \usepackage{biblatex} \bibliography{Symmetry}
 * Introduction
+  :PROPERTIES:
+  :ATTACH_DIR: /home/jlowens/dev/pkgs/gast/docs/Introduction/
+  :END:
 Finding salient object candidates in arbitrary natural images is a problem in computer vision and robotic perception that has yet to be solved. There are many ways this challenge is currently approached:
 
 - scan the entire image, at multiple scales, with some kind of object recognition algorithm, generating a heat map indicating the score or probability of a known, detected object (i.e. sliding window),
@@ -11,20 +14,32 @@ Finding salient object candidates in arbitrary natural images is a problem in co
 - compute a segmentation of the image to propose object-like regions,
 - learn a saliency function to predict regions of the image that may contain objects.
 
-In recent years and in combination with advanced deep learning systems for object recognition tasks, the use of object proposal algorithms has become almost a de-facto standard. As indicated, object proposal algorithms produce a significantly smaller of image regions to test than almost any other mechanism. The main idea is to either engineer or train a detector for what has been called the "objectness" of a region, i.e. how well that region reflects aspects of containing an object. Object aspects often include such properties as closed contours, convexity, and compactness. In the image domain, the contours can be reflected in the edges derived from the gradient image. 
+In recent years and in combination with advanced deep learning systems for object recognition tasks, the use of object proposal algorithms has become almost a de-facto standard. As indicated, object proposal algorithms produce a significantly smaller of image regions to test than almost any other mechanism. The main idea is to either engineer or train a detector for what has been called the "objectness" of a region, i.e. how well that region reflects aspects of containing an object. Object aspects often include such properties as closed contours, convexity, and compactness. In the image domain, the contours can often be reflected in the edges derived from the image gradient.
 
-However, processing image contours without any additional information (e.g. learning an object contour prior) often yields undesirable results, with many proposals that do not represent an object. When we discuss objectness, we usually care about whole physical objeccts we can pick up (box of cereal, phone, pencil, flashlight, coffee mug) and not the aspects of an object's appearance that may also provide strong gradient edge responses. 
+However, processing image contours without any additional information (e.g. learning an object contour prior) often yields undesirable results, with many proposals that do not represent an object. When we discuss objectness, we usually care about whole physical objects we can pick up (box of cereal, phone, pencil, flashlight, coffee mug) and not the aspects of an object's appearance that may also provide strong gradient edge responses, e.g. logos or pictures on a cereal box.
 
 # need to get to the point here regarding the object keypoints vs. object proposals
 
-In 1995, Reisfeld et al. proposed the use of a symmetry transform operator in the image domain for use as an attentional operator. Reisfeld showed that by extracting contours from the symmetry magnitude and selecting local maxima, it was possible to compute attention keypoints that indicated important features of the image. For example, figure \ref{fig:salient-elvis} shows an example from \cite{reisfeld1995} where selecting the maximum output of the radial symmetry transform produces keypoints for the face of Nixon, the forehead of Elvis, as well as several interesting points on the flags. 
+In 1995, Reisfeld et al. proposed the use of a symmetry transform operator in the image domain for use as an attentional operator. Since symmetry is considered a strong indicator of an object with shape \cite{reisfeld_robust_1992,dickinson_symmetry_2013}, it's reasonable to conclude that regions exhibiting strong symmetry are likely to contain objects of interest.
 
-#+NAME: fig:salient-elvis
-#+ATTR_LATEX: :width 0.5\linewidth
 #+CAPTION: Salient keypoint extraction using symmetry magnitude, from Reisfeld 1995
+#+ATTR_LATEX: :width 0.5\linewidth
+#+NAME: fig:salient-elvis
 [[file:Introduction/elvis.png]]
 
-#+NAME: fig:naive-kps
+Reisfeld showed that by extracting contours from the symmetry magnitude and selecting local maxima, it was possible to compute attention keypoints that indicated important features of the image. For example, figure [[fig:salient-elvis]] shows an example from \cite{reisfeld_context_1995} where selecting the maximum output of the radial symmetry transform produces keypoints for the face of Nixon, the forehead of Elvis, as well as several interesting points on the flags. 
+
+Like \cite{potapova_local_2012}
+
+* Mathematical Approach
+
+* Computational Approach
+* Results
+
 #+CAPTION: Symmetry keypoints naively extracted from a symmetry transform
+#+NAME: fig:naive-kps
 [[file:Introduction/naive-kps.png]]
 
+* Conclusion
+* References
+\printbibliography
