@@ -2,6 +2,7 @@
 #+AUTHOR: Jason Owens
 #+OPTIONS: toc:nil
 #+STARTUP: hidestars
+#+LaTeX_HEADER: \input{header.tex}
 #+LaTeX_HEADER: \usepackage[margin=1in]{geometry} \usepackage{ae,aecompl} \usepackage{biblatex} \bibliography{Symmetry}
 * Introduction
   :PROPERTIES:
@@ -29,17 +30,45 @@ In 1995, Reisfeld et al. proposed the use of a symmetry transform operator in th
 
 Reisfeld showed that by extracting contours from the symmetry magnitude and selecting local maxima, it was possible to compute attention keypoints that indicated important features of the image. For example, figure [[fig:salient-elvis]] shows an example from \cite{reisfeld_context_1995} where selecting the maximum output of the radial symmetry transform produces keypoints for the face of Nixon, the forehead of Elvis, as well as several interesting points on the flags. 
 
-Like \cite{potapova_local_2012}
+Need to discuss Kootstra use of the symmetry in an object saliency framework (plus the limitations). 
+
+Like \cite{potapova_local_2012}. Extends the 2D appearance-based symmetry into a 3D approach on depth maps, and yields better detection results (check this out).
 
 * Mathematical Approach
 
-* Computational Approach
-* Results
+Reisfeld's main idea is to use the gradient image to compute symmetry magnitude and direction for every pixel in the image. Given the magnitude image, one can then use non-maximum suppression to select local maxima as salient points in order to direction attentional processing. For convenience, we restate Reisfeld's mathematical formulation to provide background for the computational approach discussed in the next section. 
 
+Let $\Image\,:\,\imgdom \to [0,1]$ be a grayscale image with domain $\imgdom \subset \integer{2}$. Then $p_k \in \imgdom$ represents some pixel coordinate in the image, and $\nabla(p_k) = \left(\frac{\partial}{\partial x}\Image(p_k), \frac{\partial}{\partial y}\Image(p_k) \right)$ is the gradient at that coordinate. Reisfeld then computes a 2D polar coordinate for each pixel, $(r_k,\theta_k)$, where $r_k = \log(1 + \norm{\nabla(p_k)})$, and $\theta_k = \atantwo(\frac{\partial}{\partial y}\Image(p_k),\frac{\partial}{\partial x}\Image(p_k))$. Let $l_{ij}$ be the line passing through two points $p_i$ and $p_j$, and let $\alpha_{ij}$ be the angle $l_{ij}$ makes with the horizontal ($x$) axis. For any pixel $p_k$, define the set $\Gamma(p_k) = \{ (i,j) \mid \frac{p_i + p_j}{2} = p_k \}$, i.e. the set of pixel index pairs such that $p_k$ resides on the center of the separating line $l$. A distance, $D_\sigma(i,j)$, and phase, $P(i,j)$ function are used to determine the contribution $C(i,j)$ for each point pair in $\Gamma(p_k)$, defined as follows:
+
+\begin{align}
+D_\sigma(i,j) &= \frac{1}{\sqrt{2\pi}\sigma}e^{-\frac{\norm{p_i - p_j}}{2\sigma}} \\
+P(i,j)        &= \left(1 - \cos(\theta_i + \theta_j - 2\alpha_{ij})\right)\left(1 - \cos(\theta_i - \theta_j)\right) \\
+C(i,j)        &= D_\sigma(i,j)P(i,j)r_i r_j
+\end{align}
+
+Finally, the /symmetry magnitude/ for a point $p$ is defined as:
+\[ \sym = \sum_{(i,j) \in \Gamma(p)} C(i,j) \] which simply sums the weighted contributions over the entire ``symmetric pixel'' neighborhood of $p$ (producing an averaged value). A direction contribution function for each pixel, $\psi(i,j)$, used to compute the /symmetry direction/, $\operatorname{\phi}(p)$ for $p$, is defined as follows:
+
+\begin{align}
+\psi(i,j) &= \frac{\theta_i + \theta_j}{2} \\
+\phi(p)   &= \psi(i^*,j^*)\quad\mathrm{where}\quad(i^*,j^*) = \operatorname*{argmax}_{(i,j) \in \Gamma(p)} C(i,j)
+\end{align} 
+
+Note that in the original paper, Reisfeld justifies using the logarithm of the gradient magnitude in order to reduce the contribution of stronger gradients and makes the correlation measure ($C(i,j)$) less sensitive to stronger edges. Also note that the 2D Gaussian function used in the distance function is circular; Reisfeld points out that this can be modified to emphasize elliptical features. In addition, he defines a modified symmetry magnitude he calls /radial symmetry/ that emphasizes symmetries that are perpendicular to the primary symmetry direction (i.e. $\phi(p)$:
+
+\[ RS_\sigma(p) = \sum_{(i,j) \in \Gamma(p)} C(i,j) \sin^2 \left(\psi(i,j) - \phi(i,j)\right). \] 
+
+An important aspect of this function is to note that the $\sym$ value must already be computed (and $C(i,j)$ computed twice, or otherwise cached), by virtue of the use of $\phi(i,j),$ since the result is a function of entire neighborhood $\Gamma(p)$.
+
+* Computational Approach
+
+
+
+* Results
 #+CAPTION: Symmetry keypoints naively extracted from a symmetry transform
 #+NAME: fig:naive-kps
 [[file:Introduction/naive-kps.png]]
-
+* Future work
 * Conclusion
 * References
 \printbibliography
