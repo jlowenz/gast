@@ -1,0 +1,59 @@
+\PassOptionsToPackage{usenames,dvipsnames}{xcolor}
+%\usepackage[usenames,dvipsnames]{xcolor}
+\usepackage{graphicx}
+\usepackage{savesym} \savesymbol{iint} \savesymbol{iiint} \usepackage{amsmath}  \usepackage{amssymb} 
+%\usepackage{algorithm} \usepackage{algorithmicx} \usepackage{algpseudocode}
+\usepackage[margin=0.75in]{geometry} 
+\usepackage{tabularx} 
+%\usepackage{listings} 
+\usepackage{color} 
+\usepackage{ae,aecompl} 
+\usepackage[T1]{fontenc} 
+\restoresymbol{T}{iint} \restoresymbol{T}{iiint} 
+\usepackage{xifthen}
+\usepackage{subfig}
+%\usepackage{hyperref}
+\usepackage{mathtools}
+\usepackage{flushend}
+%\usepackage{biblatex}
+
+\newcommand{\norm}[1]{\ensuremath{\left\lVert #1 \right\rVert}}
+\renewcommand{\vec}[1]{\ensuremath{\mathbf{#1}}}
+\newcommand{\neigh}[1]{\ensuremath{\mathcal{N}_{\vec{#1}}}}
+\newcommand{\real}[1]{\ensuremath{\ifthenelse{\isempty{#1}}{\mathbb{R}}{\mathbb{R}^{#1}}}}
+\newcommand{\Func}[1]{\ensuremath{\textbf{#1}}}
+\newcommand{\hmmm}[2][]{\textcolor{blue}{[{\scriptsize #1}]}\textcolor{gray}{#2}}
+\renewcommand{\topfraction}{0.9}	% max fraction of floats at top
+\renewcommand{\bottomfraction}{0.8}	% max fraction of floats at bottom
+\newcommand{\vimg}{\ensuremath{\mathcal{I}}} 
+\newcommand{\vrng}{\ensuremath{\mathcal{R}}} 
+\newcommand{\vpcl}{\ensuremath{\mathcal{P}}}
+\newcommand{\model}{\ensuremath{\mathcal{M}}}
+\newcommand{\segments}{\ensuremath{\mathcal{S}}}
+\newcommand{\vmask}{\ensuremath{\mathcal{V}}}
+\newcommand{\true}{\ensuremath{\textbf{true}}}
+\newcommand{\false}{\ensuremath{\textbf{false}}}
+\newcommand{\normal}[1]{\ensuremath{\mathbf{\hat{#1}}}}
+\newcommand{\normali}{\ensuremath{\normal{n}_i}}
+\newcommand{\normalj}{\ensuremath{\normal{n}_j}}
+\newcommand{\lseg}{\ensuremath{\vec{x}^j_i}}
+\newcommand{\Rji}{\ensuremath{\prescript{i}{}{R_j}}}
+\newcommand{\tji}{\ensuremath{\prescript{i}{}{\vec{t}_j}}}
+
+\newcommand{\Image}{\ensuremath{\mathcal{I}}}
+\newcommand{\imgdom}{\ensuremath{\Omega}}
+\newcommand{\integer}[1]{\ensuremath{\ifthenelse{\isempty{#1}}{\mathbb{Z}}{\mathbb{Z}^{#1}}}}
+
+\newcommand{\proj}{\ensuremath{\pi}}
+\newcommand{\pt}[1]{\ensuremath{\vec{p}_{#1}}}
+\newcommand{\atantwo}{\ensuremath{\operatorname{atan2}}}
+\newcommand{\sym}{\ensuremath{M_\sigma(p)}}
+
+\newcommand{\myparagraph}[1]{\textbf{\emph{#1}}.}
+
+\renewcommand\[{\begin{equation}}
+\renewcommand\]{\end{equation}}
+
+\hyphenation{crystallography}
+
+% \thanks[*]{These authors have contributed equally to the content of this paper.}
