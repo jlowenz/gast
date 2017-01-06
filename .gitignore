@@ -5,5 +5,7 @@ swig
 *.log
 *.out
 *.pyg
-*.tex
+*.bbl
+*.odt
+technote.tex
 *~
