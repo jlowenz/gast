@@ -27,6 +27,8 @@ namespace gast {
 
   void symmetry_transform(const cv::Mat& img, cv::Mat& sym_mag, 
 			  cv::Mat& sym_dir, symmetry_state_t& sb);
+  void cpu_symmetry_transform(const cv::Mat& img, cv::Mat& sym_mag, 
+			      cv::Mat& sym_dir, symmetry_state_t& sb);
   void symmetry_transform(const cv::gpu::GpuMat& img, cv::gpu::GpuMat& sym_map, 
 			  symmetry_state_t& sb);
   void symmetry_transform(const gpu_buffers::GPUBuffer<uint8_t>& buf, 

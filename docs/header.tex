@@ -5,7 +5,8 @@
 %\usepackage{algorithm} \usepackage{algorithmicx} \usepackage{algpseudocode}
 \usepackage[margin=0.75in]{geometry} 
 \usepackage{tabularx} 
-%\usepackage{listings} 
+\usepackage{listings}
+\usepackage{tcolorbox}
 \usepackage{color} 
 \usepackage{ae,aecompl} 
 \usepackage[T1]{fontenc} 
@@ -15,6 +16,8 @@
 %\usepackage{hyperref}
 \usepackage{mathtools}
 \usepackage{flushend}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
 %\usepackage{biblatex}
 
 \newcommand{\norm}[1]{\ensuremath{\left\lVert #1 \right\rVert}}
@@ -43,6 +46,12 @@
 \newcommand{\Image}{\ensuremath{\mathcal{I}}}
 \newcommand{\imgdom}{\ensuremath{\Omega}}
 \newcommand{\integer}[1]{\ensuremath{\ifthenelse{\isempty{#1}}{\mathbb{Z}}{\mathbb{Z}^{#1}}}}
+\newcommand{\var}[1]{{\ttfamily #1}}
+\newcommand{\cmax}{C_{\max}}
+\newcommand{\thetamax}{\theta_{\max}}
+\newcommand{\pmin}{p_{\min}}
+\newcommand{\pmax}{p_{\max}}
+\newcommand{\T}{\ensuremath{^{\mkern1.5mu\mathsf{T}}}}
 
 \newcommand{\proj}{\ensuremath{\pi}}
 \newcommand{\pt}[1]{\ensuremath{\vec{p}_{#1}}}
@@ -55,5 +64,14 @@
 \renewcommand\]{\end{equation}}
 
 \hyphenation{crystallography}
+
+\lstdefinestyle{cuda}{
+  language=C++,
+  basicstyle=\footnotesize\ttfamily,
+  keywordstyle=\bfseries\color{green!40!black},
+  commentstyle=\itshape\color{purple!40!black},
+  emph={__global__,blockIdx,blockDim,threadIdx,make_int2,int2,float2},
+  emphstyle=\color{red!60!black},}
+
 
 % \thanks[*]{These authors have contributed equally to the content of this paper.}
