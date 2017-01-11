@@ -3,7 +3,7 @@
 #+OPTIONS: toc:nil
 #+STARTUP: hidestars
 #+LaTeX_HEADER: \input{header.tex}
-#+LaTeX_HEADER: \usepackage[margin=1in]{geometry} \usepackage{ae,aecompl} \usepackage{biblatex} \bibliography{Symmetry}
+#+LaTeX_HEADER: \usepackage{ae,aecompl} \usepackage{biblatex} \bibliography{Symmetry}
 * Introduction
   :PROPERTIES:
   :ATTACH_DIR: /home/jlowens/dev/pkgs/gast/docs/Introduction/
@@ -36,14 +36,14 @@ Like \cite{potapova_local_2012}. Extends the 2D appearance-based symmetry into a
 
 * Mathematical Approach
 
-Reisfeld's main idea is to use the gradient image to compute symmetry magnitude and direction for every pixel in the image. Given the magnitude image, one can then use non-maximum suppression to select local maxima as salient points in order to direction attentional processing. For convenience, we restate Reisfeld's mathematical formulation to provide background for the computational approach discussed in the next section. 
+Reisfeld's symmetry transform uses the gradient image to compute symmetry magnitude and direction for every pixel in the image. Given the magnitude image, one can then use non-maximum suppression to select local maxima as salient points in order to direction attentional processing. For convenience, we restate Reisfeld's mathematical formulation to provide background for the computational approach discussed in the next section. 
 
 Let $\Image\,:\,\imgdom \to [0,1]$ be a grayscale image with domain $\imgdom \subset \integer{2}$. Then $p_k \in \imgdom$ represents some pixel coordinate in the image, and $\nabla(p_k) = \left(\frac{\partial}{\partial x}\Image(p_k), \frac{\partial}{\partial y}\Image(p_k) \right)$ is the gradient at that coordinate. Reisfeld then computes a 2D polar coordinate for each pixel, $(r_k,\theta_k)$, where $r_k = \log(1 + \norm{\nabla(p_k)})$, and $\theta_k = \atantwo(\frac{\partial}{\partial y}\Image(p_k),\frac{\partial}{\partial x}\Image(p_k))$. Let $l_{ij}$ be the line passing through two points $p_i$ and $p_j$, and let $\alpha_{ij}$ be the angle $l_{ij}$ makes with the horizontal ($x$) axis. For any pixel $p_k$, define the set $\Gamma(p_k) = \{ (i,j) \mid \frac{p_i + p_j}{2} = p_k \}$, i.e. the set of pixel index pairs such that $p_k$ resides on the center of the separating line $l$. A distance, $D_\sigma(i,j)$, and phase, $P(i,j)$ function are used to determine the contribution $C(i,j)$ for each point pair in $\Gamma(p_k)$, defined as follows:
 
 \begin{align}
-D_\sigma(i,j) &= \frac{1}{\sqrt{2\pi}\sigma}e^{-\frac{\norm{p_i - p_j}}{2\sigma}} \\
-P(i,j)        &= \left(1 - \cos(\theta_i + \theta_j - 2\alpha_{ij})\right)\left(1 - \cos(\theta_i - \theta_j)\right) \\
-C(i,j)        &= D_\sigma(i,j)P(i,j)r_i r_j
+D_\sigma(i,j) &= \frac{1}{\sqrt{2\pi}\sigma}e^{-\frac{\norm{p_i - p_j}}{2\sigma}} \label{eq:dist} \\
+P(i,j)        &= \left(1 - \cos(\theta_i + \theta_j - 2\alpha_{ij})\right)\left(1 - \cos(\theta_i - \theta_j)\right) \label{eq:phase}\\
+C(i,j)        &= D_\sigma(i,j)P(i,j)r_i r_j \label{eq:cont}
 \end{align}
 
 Finally, the /symmetry magnitude/ for a point $p$ is defined as:
@@ -54,21 +54,133 @@ Finally, the /symmetry magnitude/ for a point $p$ is defined as:
 \phi(p)   &= \psi(i^*,j^*)\quad\mathrm{where}\quad(i^*,j^*) = \operatorname*{argmax}_{(i,j) \in \Gamma(p)} C(i,j)
 \end{align} 
 
+#+CAPTION: Illustration of the geometry and quantities involved in computing pixel pair contributions for the symmetry around point $p$.
+#+ATTR_LATEX: :width 0.6\linewidth
+#+NAME: fig:comps
+[[file:figures/pixel_contributions.pdf]]
+
+We can then define the overall output of the symmetry transform as:
+\[S_\sigma(p) = \{\sym, \phi(p)\}.\] Please see figure [[fig:comps]] for an illustration indicating the values involved in the transform.
+
 Note that in the original paper, Reisfeld justifies using the logarithm of the gradient magnitude in order to reduce the contribution of stronger gradients and makes the correlation measure ($C(i,j)$) less sensitive to stronger edges. Also note that the 2D Gaussian function used in the distance function is circular; Reisfeld points out that this can be modified to emphasize elliptical features. In addition, he defines a modified symmetry magnitude he calls /radial symmetry/ that emphasizes symmetries that are perpendicular to the primary symmetry direction (i.e. $\phi(p)$:
 
 \[ RS_\sigma(p) = \sum_{(i,j) \in \Gamma(p)} C(i,j) \sin^2 \left(\psi(i,j) - \phi(i,j)\right). \] 
 
-An important aspect of this function is to note that the $\sym$ value must already be computed (and $C(i,j)$ computed twice, or otherwise cached), by virtue of the use of $\phi(i,j),$ since the result is a function of entire neighborhood $\Gamma(p)$.
+An important aspect of this function is to note that the $\sym$ value must already be computed (and $C(i,j)$ computed twice, or otherwise cached), by virtue of the use of $\phi(i,j)$, since it is a function of the entire neighborhood $\Gamma(p)$.
 
 * Computational Approach
+From the mathematical definition of the symmetry transform, we can see that there are no mutual data dependencies between pixels given the gradient image; in other words, the problem is embarrassingly parallel. Each pixel /does/ depend on a neighborhood (defined both by equation \ref{eq:dist} and $\Gamma(\cdot)$), but $\sym$ does not need values computed by any other neighboring pixel. We can therefore compute the symmetry transform for each pixel independently, which suggests that an adaptation of the algorithm for GPU computation should be relatively straightforward. 
 
+In this section, we present the basic sequential algorithm (with no optimizations), and then discuss how it was readily adapted for computation on a GPU. 
 
+** Sequential Algorithm
+
+Algorithm \ref{alg:sym} represents the pseudocode for the symmetry transform, which accepts the minimum radius $\sigma$, the gradient magnitude image $g_m$, and the gradient direction image $g_\theta$, where $\sigma \in \integer{}$, $g_m : \imgdom \to \real{}$ and $g_\theta : \imgdom \to \real{}$. 
+
+There are several specific aspects we highlight in this formulation. While Reisfeld leaves the definition of $\Gamma(p)$ open to /all/ symmetric points surrounding $p$, the effects of points further away are clearly limited by the distance function $D_\sigma(i,j)$ (i.e. eq \ref{eq:dist}). In this code, we explicitly limit the bounds of the per-pixel neighbor iteration to a square region defined by the $\pmin$ and $\pmax$, with sides equal to $2\rho = 5\sigma$, see lines \ref{ln:gamma}-\ref{ln:gamma2}. This follows the implementation details given by Kootstra et al. in \cite{kootstra_using_2010}, where they use default min/max radius values of 7 and 17, respectively. In this implementation, $\sigma$ is given as a parameter to the function to control the scale, and we compute the max radius as $\rho$ directly from $\sigma$. Also, note that the $\operatorname{argmax}$ is implemented inline in lines \ref{ln:argmax}-\ref{ln:argmax2} to avoid running another loop to compute the maximum. Finally, we only have to process /half/ the neighborhood region, since by definition the other half of the points are symmetric to the first half; line \ref{ln:break} shows where this early termination occurs. 
+
+\begin{algorithm}[ht]
+\caption{Symmetry Transform}\label{alg:sym}
+\begin{algorithmic}[1]
+\Function{symmetry}{$\sigma,g_m,g_\theta$}\Comment{\parbox[t]{.5\linewidth}{Symmetry transform with radius $\sigma$ for $\Image$ with gradient magnitude $g_m$ and gradient direction $g_\theta$.}}
+\State $\rho \gets 2.5\sigma$
+\State $S_m, S_\theta \gets$ new arrays of $\real{}$ compatible with $\Image$
+\For{$y \gets 0, \operatorname{rows}(\Image)$}\Comment{Iterate over all pixels in $\imgdom$}
+\For{$x \gets 0, \operatorname{cols}(\Image)$}
+\State $M, C_{ij}, \psi_{ij}, \cmax, \phi_p, \alpha_{ij} \gets 0$ \label{ln:par}
+\State $p \gets [x,y]\T$
+\State $\pmin \gets p - \rho$
+\State $\pmax \gets p + \rho$
+\For{$j \gets \pmin[y], \pmax[y] $}\Comment{Iterate over all pixel indices in the square $(\pmin,\pmax)$}\label{ln:gamma}
+\For{$i \gets \pmin[x], \pmax[x] $}\label{ln:gamma2}
+\State $p_i \gets [i,j]\T$
+\State $p_j \gets p - (p_i - p)$ \Comment{Compute the mirror point}
+\If{$p_i = p$}
+\State terminate neighborhood loop \Comment{All remaining $p_i,p_j$ pixel pairs are symmetric}\label{ln:break}
+\EndIf
+\If{$\operatorname{valid\_pt}(p_i) \wedge \operatorname{valid\_pt}(p_j)$}
+\State $r_i,\theta_i \gets \operatorname{pt\_gradient}(g_m,g_\theta,p_i)$
+\State $r_j,\theta_j \gets \operatorname{pt\_gradient}(g_m,g_\theta,p_j)$
+\State $\delta_{ij} \gets p_j - p_i$
+\State $\alpha_{ij} \gets \atantwo(\delta_{ij}[y],\delta_{ij}[x])$
+\State $C_{ij} \gets r_i r_j \operatorname{D}(i,j,\sigma) \operatorname{P}(\alpha_{ij},i,j)$
+\State $M \gets M + C_{ij}$
+\State $\psi_{ij} \gets \frac{(\theta_i + \theta_j)}{2}$
+\If{$C_{ij} > \cmax$} \label{ln:argmax}
+\State $\cmax \gets C_{ij}$
+\State $\phi_p \gets \psi_{ij}$
+\EndIf \label{ln:argmax2}
+\EndIf
+\EndFor
+\EndFor
+\State $S_m(p) \gets M$
+\State $S_\theta(p) \gets \phi_p$ \label{ln:par2}
+\EndFor
+\EndFor
+\State \Return{$S_m,S_\theta$}
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+** Parallel Adaptation
+
+To adapt algorithm \ref{alg:sym} for the GPU, we simply extract lines \ref{ln:par}-\ref{ln:par2} and convert them to an appropriate GPU kernel function (see the code listing in Algorithm \ref{alg:kernel}). In our implementation, we use the CUDA language for NVIDIA GPUs (the most common discrete GPU in our environment). We do not claim any particular ingenuity in converting this problem to a parallel implementation; we simply document the implementation and show the performance benefits. 
+
+Note that it is impossible to get full utilization of the thread warps near the edges of the image, since some threads will be sitting idle due to the =valid\_pt= checks ensuring we don't process pixels outside the image bounds. Also note in lines 30-31 that we apply the modification from \cite{kootstra_using_2010} that ignores the gradients near the center of the point, to help emphasize the gradients at the given radius ($\sigma$); this produces a "no computation zone" that causes portions of thread warps to become idle, due to the SIMD nature of the CUDA computation model.
+
+The kernel is then called with a default block size of $16\times16$. No optimizations have yet been implemented for device-dependent occupancies or shared memory usage. Both adjustments could improve overall performance, but require additional complexity in the kernel and the host calling function. 
+
+\begin{algorithm}[ht]
+\caption{Parallel Cuda Kernel}\label{alg:kernel}
+\lstinputlisting[numbers=left,style=cuda,firstline=146,lastline=198]{../src/symmetry_transform.cu}
+\end{algorithm}
 
 * Results
-#+CAPTION: Symmetry keypoints naively extracted from a symmetry transform
-#+NAME: fig:naive-kps
-[[file:Introduction/naive-kps.png]]
+** Performance
+
+ #+CAPTION: Single-CPU vs GPU performance comparison. Note that there is two orders of magnitude improvement between the GPU and the CPU runtime. Tests were performed on a 4th-Gen Core i7 2.9 GHz processor and NVidia Quadro M3000M GPU with 768 CUDA cores.
+ #+ATTR_LATEX: :width 0.6\linewidth
+ #+NAME: fig:perf
+ [[file:figures/cpu_v_gpu.png]]
+
+The performance difference between single-CPU and GPU implementations is staggering. As Figure \ref{fig:perf} shows using a logarithmic-scale y axis, there are two orders of magnitude improvement in execution time for the GPU version, primarily due to the massive parallelism on the GPU and the virtually non-existent dependencies between pixel values (i.e. no reductions necessary, and no waiting), even with idle threads due to the internal "no computation zone." 
+
+** Transform Output
+
+For our purposes, we are much less interested in the symmetry direction as we are in the symmetry magnitude (as discussed in the introduction). Figure \ref{fig:ex_xforms} shows example output from the implemented symmetry transform as well as simple "feature" detection output derived from the symmetry magnitude images. A quick and dirty method for finding features is to use non-maximum suppression to find local maxima (and then suppress any other maxima within a given radius). To show the usefulness of the transform on natural images, we implemented a simple detector that computes an image pyramid, runs the symmetry transform on each layer, and then merges the result into a single full-scale magnitude image in order to find local maxima. In the results shown, our detector uses a suppression radius of 15 pixels. 
+
+Evident in the images...
+
+\begin{figure}
+\centering
+\subfloat[]{\label{fig:kit_smag_0}\includegraphics[width=0.2\linewidth]{figures/kitchen_smag_1}}
+\subfloat[]{\label{fig:kit_feats_0}\includegraphics[width=0.2\linewidth]{figures/kitchen_feats_1}}
+\subfloat[]{\label{fig:meet_smag_0}\includegraphics[width=0.2\linewidth]{figures/meeting_smag_1}}
+\subfloat[]{\label{fig:meet_feats_0}\includegraphics[width=0.2\linewidth]{figures/meeting_feats_1}}\\
+\subfloat[]{\label{fig:kit_smag_1}\includegraphics[width=0.2\linewidth]{figures/kitchen_smag_3}}
+\subfloat[]{\label{fig:kit_feats_1}\includegraphics[width=0.2\linewidth]{figures/kitchen_feats_3}}
+\subfloat[]{\label{fig:meet_smag_1}\includegraphics[width=0.2\linewidth]{figures/meeting_smag_3}}
+\subfloat[]{\label{fig:meet_feats_1}\includegraphics[width=0.2\linewidth]{figures/meeting_feats_3}}\\
+\subfloat[]{\label{fig:kit_smag_2}\includegraphics[width=0.2\linewidth]{figures/kitchen_smag_5}}
+\subfloat[]{\label{fig:kit_feats_2}\includegraphics[width=0.2\linewidth]{figures/kitchen_feats_5}}
+\subfloat[]{\label{fig:meet_smag_2}\includegraphics[width=0.2\linewidth]{figures/meeting_smag_5}}
+\subfloat[]{\label{fig:meet_feats_2}\includegraphics[width=0.2\linewidth]{figures/meeting_feats_5}}\\
+\subfloat[]{\label{fig:kit_smag_3}\includegraphics[width=0.2\linewidth]{figures/kitchen_smag_7}}
+\subfloat[]{\label{fig:kit_feats_3}\includegraphics[width=0.2\linewidth]{figures/kitchen_feats_7}}
+\subfloat[]{\label{fig:meet_smag_3}\includegraphics[width=0.2\linewidth]{figures/meeting_smag_7}}
+\subfloat[]{\label{fig:meet_feats_3}\includegraphics[width=0.2\linewidth]{figures/meeting_feats_7}}\\
+\subfloat[]{\label{fig:kit_smag_4}\includegraphics[width=0.2\linewidth]{figures/kitchen_smag_9}}
+\subfloat[]{\label{fig:kit_feats_4}\includegraphics[width=0.2\linewidth]{figures/kitchen_feats_9}}
+\subfloat[]{\label{fig:meet_smag_4}\includegraphics[width=0.2\linewidth]{figures/meeting_smag_9}}
+\subfloat[]{\label{fig:meet_feats_4}\includegraphics[width=0.2\linewidth]{figures/meeting_feats_9}}
+\caption{Five consecutive images each of the =kitchen\_small= (left pair) and =meeting\_small= (right pair) scenes from the rgbd\_scenes dataset \cite{Henry2012}. For each pair, the computed symmetry magnitude is shown on the left, and the local maxima found using non-maximum suppression is shown on the left, using radius 15.}
+\label{fig:ex_xforms}
+\end{figure}
+
 * Future work
+
+
+
 * Conclusion
-* References
+
 \printbibliography

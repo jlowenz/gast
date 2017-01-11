@@ -14,7 +14,7 @@ find_package(catkin REQUIRED COMPONENTS
 find_package(OpenCV 2.4.13 REQUIRED COMPONENTS core gpu)
 include_directories(${OpenCV_INCLUDE_DIRS})
 
-find_package(CUDA 7.5 REQUIRED)
+find_package(CUDA REQUIRED)
 include_directories(${CUDA_INCLUDE_DIRS})
 add_definitions(${CUDA_DEFINITIONS})
 
