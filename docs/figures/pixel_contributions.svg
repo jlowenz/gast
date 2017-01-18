@@ -15,7 +15,10 @@
    id="svg2"
    version="1.1"
    inkscape:version="0.48.4 r9939"
-   sodipodi:docname="pixel_contributions.svg">
+   sodipodi:docname="pixel_contributions.pdf"
+   inkscape:export-filename="/home/jlowens/dev/pkgs/gast/docs/figures/pixel_contributions.png"
+   inkscape:export-xdpi="299.95969"
+   inkscape:export-ydpi="299.95969">
   <sodipodi:namedview
      id="base"
      pagecolor="#ffffff"
@@ -187,7 +190,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
