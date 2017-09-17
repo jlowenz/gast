@@ -7,5 +7,17 @@ swig
 *.pyg
 *.bbl
 *.odt
+*.acn
+*.acr
+*.alg
+*.blg
+*.glg
+*.glo
+*.gls
+*.ist
+*.log
+*.lot
+*.lof
+*.toc
 technote.tex
 *~
