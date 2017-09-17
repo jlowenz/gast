@@ -1,31 +1,76 @@
-\PassOptionsToPackage{usenames,dvipsnames}{xcolor}
-%\usepackage[usenames,dvipsnames]{xcolor}
 \usepackage{graphicx}
 \usepackage{savesym} \savesymbol{iint} \savesymbol{iiint} \usepackage{amsmath}  \usepackage{amssymb} 
-%\usepackage{algorithm} \usepackage{algorithmicx} \usepackage{algpseudocode}
-\usepackage[margin=0.75in]{geometry} 
-\usepackage{tabularx} 
-\usepackage{listings}
-\usepackage{tcolorbox}
 \usepackage{color} 
-\usepackage{ae,aecompl} 
-\usepackage[T1]{fontenc} 
 \restoresymbol{T}{iint} \restoresymbol{T}{iiint} 
 \usepackage{xifthen}
-\usepackage{subfig}
-%\usepackage{hyperref}
 \usepackage{mathtools}
 \usepackage{flushend}
+\usepackage{marginnote}
+\usepackage{setspace}
+\usepackage[utf8]{inputenc}
+\usepackage{tabularx}
+\usepackage[hidelinks]{hyperref}
+\usepackage{booktabs}
+\usepackage{xfrac}
+\usepackage{xparse}
+\usepackage{threeparttable}
+\usepackage[acronym,shortcuts]{glossaries}
+\usepackage{needspace}
+\usepackage{pifont}
+\newcommand{\cmark}{\ding{51}}%
+\newcommand{\xmark}{\ding{55}}%
+%\usepackage{acro}
+%\acsetup{first-style=short}
+\usepackage{listings}
+\usepackage{xcolor,colortbl}
+\usepackage{rotating}
+\usepackage{adjustbox}
 \usepackage{algorithm}
 \usepackage{algpseudocode}
-%\usepackage{biblatex}
 
+%% Adjust captions to meet ARL standards
+\usepackage{subcaption}
+\captionsetup[figure]{labelfont=bf,textfont=bf,size=footnotesize,labelsep=space}
+\captionsetup[subfigure]{labelfont=bf,textfont=bf,size=footnotesize,labelsep=space}
+\captionsetup[table]{labelfont=bf,textfont=bf,size=footnotesize,labelsep=space}
+\usepackage{ARLboxhandler}
+
+%% Make tables smaller
+\newcommand*{\smalltables}{\let\Tabular\tabular
+\def\tabular{\sffamily\fontsize{7.000000}{8.400000}\selectfont\Tabular}
+\definecolor{blue}{rgb}{0.316186,0.433203,0.916155}
+\definecolor{lightblue}{rgb}{0.716186,0.833203,0.916155}}
+\newcommand*{\restoretables}{\let\tabular\Tabular}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% support creating braces INSTEAD of parens when already inside parens
+\newcommand*{\pac}[2][]{\ifglsused{#2}{\acs[#1]{#2}}{%
+ \glsunset{#2}%
+ \acl[#1]{#2} [\acs[#1]{#2}]}}
+
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+\ra{1.3}
+
+%% COMMENT COMMANDS
+\newcommand{\comment}[3]{\marginpar{\raggedright\setstretch{0.5}\textcolor{#1}{\scriptsize #2}}\textcolor{gray}{#3}} 
+\newcommand{\hmmm}[2][]{\comment{orange}{#1}{#2}}
+\newcommand{\jlo}[2][]{\comment{blue}{#1}{#2}}
+\newcommand{\pro}[2][]{\comment{red}{#1}{#2}}
+\newcommand{\jvp}[2][]{\comment{olive}{#1}{#2}}
+
+%% FORMATTING
+
+% ARL-compliant figure refs
+\newcommand{\arlfig}[1]{Fig.~\ref{#1}}
+\newcommand{\Arlfig}[1]{Figure~\ref{#1}}
+\newcommand{\ie}{i.e.,~}
+
+%% MATH COMMANDS
 \newcommand{\norm}[1]{\ensuremath{\left\lVert #1 \right\rVert}}
 \renewcommand{\vec}[1]{\ensuremath{\mathbf{#1}}}
 \newcommand{\neigh}[1]{\ensuremath{\mathcal{N}_{\vec{#1}}}}
 \newcommand{\real}[1]{\ensuremath{\ifthenelse{\isempty{#1}}{\mathbb{R}}{\mathbb{R}^{#1}}}}
 \newcommand{\Func}[1]{\ensuremath{\textbf{#1}}}
-\newcommand{\hmmm}[2][]{\textcolor{blue}{[{\scriptsize #1}]}\textcolor{gray}{#2}}
 \renewcommand{\topfraction}{0.9}	% max fraction of floats at top
 \renewcommand{\bottomfraction}{0.8}	% max fraction of floats at bottom
 \newcommand{\vimg}{\ensuremath{\mathcal{I}}} 
@@ -43,6 +88,34 @@
 \newcommand{\Rji}{\ensuremath{\prescript{i}{}{R_j}}}
 \newcommand{\tji}{\ensuremath{\prescript{i}{}{\vec{t}_j}}}
 
+\newcommand{\snode}{\ensuremath{\mathbb{S}}}
+\newcommand{\lnode}{\ensuremath{\mathbb{L}}}
+\newcommand{\pnode}{\ensuremath{\mathbb{P}}}
+\newcommand{\sval}[1]{\ensuremath{\ifthenelse{\isempty{#1}}{\vec{x}^\snode}{\vec{x}_{#1}^\snode}}}
+\newcommand{\lval}[1]{\ensuremath{\ifthenelse{\isempty{#1}}{\vec{x}^\lnode}{\vec{x}_{#1}^\lnode}}}
+\newcommand{\pval}[1]{\ensuremath{\ifthenelse{\isempty{#1}}{\vec{x}^\pnode}{\vec{x}_{#1}^\pnode}}}
+%\newcommand{\lval}[1]{\ensuremath{\vec{x}^\lnode}}
+%\newcommand{\pval}[1]{\ensuremath{\vec{x}^\pnode}}
+\newcommand{\typeof}[1]{\ensuremath{\mathrm{type}(#1)}}
+\newcommand{\nodea}[1]{\ensuremath{\vec{x}_{#1}^\alpha}}
+\newcommand{\nodeb}[1]{\ensuremath{\vec{x}_{#1}^\beta}}
+\newcommand{\emean}[1]{\ensuremath{\vec{\mu}_{#1}}}
+\newcommand{\proj}{\ensuremath{\pi}}
+\newcommand{\pt}[1]{\ensuremath{\vec{p}_{#1}}}
+
+\newcommand{\myparagraph}[1]{\textbf{\emph{#1}}.}
+
+\renewcommand\[{\begin{equation}}
+\renewcommand\]{\end{equation}}
+
+%% environment for nice latex tables
+%\newenvironment{asdtablewrap}[2]{%
+%\newcommand{\hr}{\hline\addlinespace[0.1em]}
+%\setlength{\tablecolsep}{12pt}}{}
+
+% \thanks[*]{These authors have contributed equally to the content of this paper.}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Commands for GAST
 \newcommand{\Image}{\ensuremath{\mathcal{I}}}
 \newcommand{\imgdom}{\ensuremath{\Omega}}
 \newcommand{\integer}[1]{\ensuremath{\ifthenelse{\isempty{#1}}{\mathbb{Z}}{\mathbb{Z}^{#1}}}}
@@ -52,16 +125,8 @@
 \newcommand{\pmin}{p_{\min}}
 \newcommand{\pmax}{p_{\max}}
 \newcommand{\T}{\ensuremath{^{\mkern1.5mu\mathsf{T}}}}
-
-\newcommand{\proj}{\ensuremath{\pi}}
-\newcommand{\pt}[1]{\ensuremath{\vec{p}_{#1}}}
 \newcommand{\atantwo}{\ensuremath{\operatorname{atan2}}}
 \newcommand{\sym}{\ensuremath{M_\sigma(p)}}
-
-\newcommand{\myparagraph}[1]{\textbf{\emph{#1}}.}
-
-\renewcommand\[{\begin{equation}}
-\renewcommand\]{\end{equation}}
 
 \hyphenation{crystallography}
 
@@ -72,6 +137,3 @@
   commentstyle=\itshape\color{purple!40!black},
   emph={__global__,blockIdx,blockDim,threadIdx,make_int2,int2,float2},
   emphstyle=\color{red!60!black},}
-
-
-% \thanks[*]{These authors have contributed equally to the content of this paper.}

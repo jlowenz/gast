@@ -1,0 +1,40 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% INITIAL ARL DOCUMENT BOILERPLATE
+
+\documentclass[12pt]{arlticle}
+\usepackage{pdflscape}
+\usepackage{coseoul}
+\usepackage{notoccite}% PREVENTS CITES IN CAPTIONS FROM MISNUMBERING YOUR REFERENCES
+% THANKS TO ADAM SOKOLOW FOR THESE CONVENIENT USES OF totpages AND changepage PACKAGES
+\usepackage{totpages}% FOR ITEM 18 OF THE SF298
+\usepackage{changepage}% TO MAKE SURE CERTAIN THINGS START ON ODD PAGE #
+% MACRO TO GO TO ODD PAGE, INSERTING "INTENTIONALLY LEFT BLANK" IF
+% NEEDED
+\newcommand\gotooddpage{\clearpage%
+  \checkoddpage\ifoddpage\else\blankpage\fi\clearpage}
+% MACRO TO FINISH ON EVEN PAGE, INSERTING "INTENTIONALLY LEFT BLANK" IF NEEDED
+\newcommand\finishonevenpage{%
+  \clearpage\checkoddpage\ifoddpage\else\blankpage\fi}
+% ARL FOOTNOTE STYLE:
+\usepackage[symbol,perpage]{footmisc}
+%%%%%
+% CHECK WITH ORGANIZATION TO SEE IF WHAT FOLLOWS IS LATEST MANDATORY DISTRIBUTION LIST
+  \def\MandatoryDL{ARL-07-27-16(Unlimited).dls}% MANDATORY DISTRIBUTION LIST FILE
+  \def\LocalMandatoryDL{blank.dls}% USED FOR DIRECTORATE LEVEL MANDATORY DISTRIBUTIONS
+  \def\UserDL{user.dls}%      USER DISTRIBUTION LIST FILE
+  \addtolength{\cftfignumwidth}{0.0ex}%  EXTEND WIDTH OF LOF LABEL IF USING
+%                                        APPENDIX FIGURES .OR. > 99 FIGURES
+  \addtolength{\cfttabnumwidth}{0.0ex}%  EXTEND WIDTH OF LOT LABEL IF USING
+%                                        APPENDIX TABLES .OR. > 99 TABLES
+%% IN ADDITION TO THE DEFAULT (COMPUTER-MODERN) MATH FONT, THE FOLLOWING
+%% ALTERNATIVES ARE APPROVED FOR USE IN ARL REPORTS (OPTIONALLY CHOOSE ONE LINE)
+%  \usepackage{eulervm,eufrak}
+%  \usepackage{newtxmath}
+%  \usepackage{mathptmx}
+%%
+%\nosectspace% THE DEFAULT, TURNS OFF \spaceout{} FOR SPREADING OUT SECTION HEAD TEXT
+\sectspace% MAY NEED TO TURN THIS SETTING OFF IF YOU HAVE STUFF OTHER THAN 
+%           TEXT, \color, OR \label IN YOUR SECTION TITLES
+
+\pagenumbering{roman}
+

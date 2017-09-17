@@ -1,0 +1,19 @@
+\gotooddpage
+\baresection{List of Symbols, Acronyms, and Abbreviations}
+%\printacronyms[include-classes=abbrev]
+\renewcommand{\glossarysection}[2][]{} % hide the title
+\printglossary[type=\acronymtype]
+%\printacronyms
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% DISTRIBUTION LIST
+\gotooddpage
+\distlistsetup
+\begin{distributionlist}
+  \input{\MandatoryDL}
+  \input{\UserDL}
+\end{distributionlist}
+\distlistcleanup
+\finishonevenpage
+
+\end{document}
