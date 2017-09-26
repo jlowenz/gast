@@ -118,7 +118,7 @@ In the theory of Gestalt perception, the whole is considered more than the sum o
 \subsection{Contributions}
 \label{sec:contributions}
 
-This technical note documents our work implementing the symmetry algorithm directly from Reisfeld's mathematical formulation to an NVIDIA CUDA kernel for \gls{gpu} acceleration. We make the following contributions: a brief analysis of the computational implications of the algorithm, leading to the parallel nature of the problem; algorithm and source listing for the parallel kernel; and a brief discussion of the GPU performance and the output of a simple salient point detector. 
+In the following sections, we document our work implementing the symmetry algorithm directly from Reisfeld's mathematical formulation as an NVIDIA CUDA kernel for \gls{gpu} acceleration. We make the following contributions: a brief analysis of the computational implications of the algorithm, leading to the parallel nature of the problem; algorithm and source listing for the parallel kernel; and a brief discussion of the GPU performance and the output of a simple salient point detector. 
 
 \section{Mathematical Approach}
 \label{sec:mathematical}
@@ -149,7 +149,7 @@ We can then define the overall output of the symmetry transform as:
 \centering
 \includegraphics[width=0.6\linewidth]{figures/pixel_contributions.pdf}
 \caption{\label{fig:pixel-contr}
-Illustration of the geometry and quantities involved in computing pixel pair contributions for the image gradient symmetry around point \(p\).}
+Illustration of the geometry and quantities involved in computing pixel pair contributions for the image gradient symmetry around point \(p\)}
 \end{figure}
 
 Note that in the original paper, Reisfeld justifies using the logarithm of the gradient magnitude in order to reduce the contribution of stronger gradients and makes the correlation measure (\(C(i,j)\)) less sensitive to stronger edges. Also note that the 2D Gaussian function used in the distance function is circular; Reisfeld points out that this can be modified to emphasize elliptical features. In addition, he defines a modified symmetry magnitude he calls \emph{radial symmetry} that emphasizes symmetries that are perpendicular to the primary symmetry direction (i.e. \(\phi(p)\):
@@ -169,9 +169,8 @@ In this section, we present the basic sequential algorithm (with no optimization
 
 Algorithm \ref{alg:sym} represents the pseudocode for the symmetry transform, which accepts the minimum radius \(\sigma\), the gradient magnitude image \(g_m\), and the gradient direction image \(g_\theta\), where \(\sigma \in \integer{}\), \(g_m : \imgdom \to \real{}\) and \(g_\theta : \imgdom \to \real{}\). 
 
-There are several specific aspects we highlight in this formulation. While Reisfeld leaves the definition of \(\Gamma(p)\) open to \emph{all} symmetric points surrounding \(p\), the effects of points further away are clearly limited by the distance function \(D_\sigma(i,j)\) (i.e. eq \ref{eq:dist}). In this code, we explicitly limit the bounds of the per-pixel neighbor iteration to a square region defined by the \(\pmin\) and \(\pmax\), with sides equal to \(2\rho = 5\sigma\), see lines \ref{ln:gamma}-\ref{ln:gamma2}. This follows the implementation details given by Kootstra et al. in \cite{kootstra_using_2010}, where they use default min/max radius values of 7 and 17, respectively. In this implementation, \(\sigma\) is given as a parameter to the function to control the scale, and we compute the max radius as \(\rho\) directly from \(\sigma\). Also, note that the \(\operatorname{argmax}\) is implemented inline in lines \ref{ln:argmax}-\ref{ln:argmax2} to avoid running another loop to compute the maximum. Finally, we only have to process \emph{half} the neighborhood region, since by definition the other half of the points are symmetric to the first half; line \ref{ln:break} shows where this early termination occurs. 
-
-\begin{algorithm}[ht]
+\Needspace{1.0\textheight}
+\begin{algorithm}[!htp]
 \caption{Symmetry Transform}\label{alg:sym}
 \begin{algorithmic}[1]
 \Function{symmetry}{$\sigma,g_m,g_\theta$}\Comment{\parbox[t]{.5\linewidth}{Symmetry transform with radius $\sigma$ for $\Image$ with gradient magnitude $g_m$ and gradient direction $g_\theta$.}}
@@ -214,17 +213,21 @@ There are several specific aspects we highlight in this formulation. While Reisf
 \end{algorithmic}
 \end{algorithm}
 
+There are several specific aspects we highlight in this formulation. While Reisfeld leaves the definition of \(\Gamma(p)\) open to \emph{all} symmetric points surrounding \(p\), the effects of points further away are clearly limited by the distance function \(D_\sigma(i,j)\) (i.e. eq \ref{eq:dist}). In this code, we explicitly limit the bounds of the per-pixel neighbor iteration to a square region defined by the \(\pmin\) and \(\pmax\), with sides equal to \(2\rho = 5\sigma\), see lines \ref{ln:gamma}-\ref{ln:gamma2}. This follows the implementation details given by Kootstra et al.\cite{kootstra_using_2010}, where they use default minimum and maximum radii values of 7 and 17, respectively. In this implementation, \(\sigma\) is given as a parameter to the function to control the scale, and we compute the max radius as \(\rho\) directly from \(\sigma\). Also, note that the \(\operatorname{argmax}\) is implemented inline in lines \ref{ln:argmax}-\ref{ln:argmax2} to avoid running another loop to compute the maximum. Finally, we only have to process \emph{half} the neighborhood region, since by definition the other half of the points are symmetric to the first half; line \ref{ln:break} shows where this early termination occurs. 
+
+
 \subsection{Parallel Adaptation}
 \label{sec:parallel}
 
-To adapt algorithm \ref{alg:sym} for the GPU, we simply extract lines \ref{ln:par}-\ref{ln:par2} and convert them to an appropriate \gls{gpu} kernel function (see the code listing in Algorithm \ref{alg:kernel}). In our implementation, we use the CUDA language for NVIDIA \glspl{gpu} (the most common discrete \gls{gpu} in our environment). We do not claim any particular ingenuity in converting this problem to a parallel implementation; we simply document the implementation and show the performance benefits. 
+To adapt Alg. \ref{alg:sym} for the GPU, we simply extract lines \ref{ln:par}-\ref{ln:par2} and convert them to an appropriate \gls{gpu} kernel function (see the code listing in Alg. \ref{alg:kernel}). In our implementation, we use the CUDA language for NVIDIA \glspl{gpu} (the most common discrete \gls{gpu} in our environment). We do not claim any particular ingenuity in converting this problem to a parallel implementation; we simply document the implementation and show the performance benefits. 
 
-\begin{algorithm}[ht]
+\Needspace{0.8\textheight}
+\begin{algorithm}[!htp]
 \caption{Parallel Cuda Kernel}\label{alg:kernel}
 \lstinputlisting[numbers=left,style=cuda,firstline=146,lastline=198]{../src/symmetry_transform.cu}
 \end{algorithm}
 
-Note that it is impossible to get full utilization of the thread warps near the edges of the image, since some threads will be sitting idle due to the \texttt{valid\textbackslash{}\_pt} checks ensuring we don't process pixels outside the image bounds. Also note in lines 30-31 that we apply the modification from \cite{kootstra_using_2010} that ignores the gradients near the center of the point, to help emphasize the gradients at the given radius (\(\sigma\)); this produces a "no computation zone" that causes portions of thread warps to become idle, due to the \gls{simd} nature of the CUDA computation model.
+Note that it is impossible to get full utilization of the thread warps near the edges of the image, since some threads will be sitting idle due to the \texttt{valid\_pt} checks ensuring we don't process pixels outside the image bounds. Also note in lines 30-31 that we apply the modification from \cite{kootstra_using_2010} that ignores the gradients near the center of the point, to help emphasize the gradients at the given radius (\(\sigma\)); this produces a "no computation zone" that causes portions of thread warps to become idle, due to the \gls{simd} nature of the CUDA computation model.
 
 The kernel is then called with a default block size of \(16\times16\). No optimizations have yet been implemented for device-dependent occupancies or shared memory usage. Both adjustments could improve overall performance, but require additional complexity in the kernel and the host calling function. 
 
@@ -239,7 +242,7 @@ The performance difference between single-CPU and GPU implementations is stagger
 \centering
 \includegraphics[width=0.6\linewidth]{figures/cpu_v_gpu.png}
 \caption{\label{fig:perf}
-Single-\gls{cpu} vs \gls{gpu} performance comparison. Note that there is two orders of magnitude improvement between the \gls{gpu} and the \gls{cpu} runtime. Tests were performed on an Intel 4th-Gen Core i7 2.9 GHz processor and NVidia Quadro M3000M \gls{gpu} with 768 CUDA cores.}
+Single-\gls{cpu} vs \gls{gpu} performance comparison. Note that there is two orders of magnitude improvement between the \gls{gpu} and the \gls{cpu} runtime. Tests were performed on an Intel 4th-Gen Core i7 2.9 GHz processor and NVidia Quadro M3000M \gls{gpu} with 768 CUDA cores}
 \end{figure}
 
 \subsection{Transform Output}
@@ -270,7 +273,7 @@ For our purposes, we are much less interested in the symmetry direction as we ar
 \begin{subfigure}[]{0.25\linewidth}\label{fig:kit_feats_4}\includegraphics[width=\linewidth]{figures/kitchen_feats_9}\end{subfigure}%
 \begin{subfigure}[]{0.25\linewidth}\label{fig:meet_smag_4}\includegraphics[width=\linewidth]{figures/meeting_smag_9}\end{subfigure}%
 \begin{subfigure}[]{0.25\linewidth}\label{fig:meet_feats_4}\includegraphics[width=\linewidth]{figures/meeting_feats_9}\end{subfigure}
-\caption{Five consecutive images each of the \textt{kitchen\_small} (left pair) and \text_tt{meeting\_small} (right pair) scenes from the \texttt{rgbd\_scenes} dataset \cite{Henry2012}. For each pair, the computed symmetry magnitude is shown on the left, and the local maxima found using non-maximum suppression is shown on the left, using radius 15}
+\caption{Five consecutive images each of the \texttt{kitchen\_small} (left pair) and \texttt{meeting\_small} (right pair) scenes from the \texttt{rgbd\_scenes} dataset\cite{henry_rgb-d_2012}. For each pair, the computed symmetry magnitude is shown on the left, and the local maxima found using non-maximum suppression is shown on the left, using radius 15}
 \label{fig:ex_xforms}
 \end{figure}
 
