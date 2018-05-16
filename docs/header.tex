@@ -14,7 +14,7 @@
 \usepackage{xfrac}
 \usepackage{xparse}
 \usepackage{threeparttable}
-\usepackage[acronym,shortcuts]{glossaries}
+\usepackage[acronym,shortcuts,nonumberlist,nopostdot]{glossaries}
 \usepackage{needspace}
 \usepackage{pifont}
 \newcommand{\cmark}{\ding{51}}%
@@ -27,6 +27,7 @@
 \usepackage{adjustbox}
 \usepackage{algorithm}
 \usepackage{algpseudocode}
+\usepackage{enumitem}
 
 
 %% Adjust captions to meet ARL standards
@@ -64,6 +65,8 @@
 % ARL-compliant figure refs
 \newcommand{\arlfig}[1]{Fig.~\ref{#1}}
 \newcommand{\Arlfig}[1]{Figure~\ref{#1}}
+\newcommand{\arleq}[1]{Eq.~\ref{#1}}
+\newcommand{\Arleq}[1]{Equation.~\ref{#1}}
 \newcommand{\ie}{i.e.,~}
 \newcommand{\eg}{e.g.,~}
 

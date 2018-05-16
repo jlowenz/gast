@@ -2,7 +2,10 @@
 \baresection{List of Symbols, Acronyms, and Abbreviations}
 %\printacronyms[include-classes=abbrev]
 \renewcommand{\glossarysection}[2][]{} % hide the title
-\printglossary[type=\acronymtype]
+%%\setlist[enumerate]{font=\rmfamily}
+%%\renewcommand\labelenumi{\theenumi}
+\glsnogroupskiptrue
+\printglossary[type=\acronymtype,style=super]
 %\printacronyms
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
