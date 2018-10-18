@@ -15,8 +15,8 @@
 
 % COVER & TITLE PAGE INPUTS SPECIFIED IN THE FOLLOWING COMMANDS:
 %\arlzipcode	{}%		For use, if other than 21005-5066, i.e., 5069
-\arlrptno  {ARL-TN-0000}%		Uncomment and use, when needed
-\pubdate   {April 2018}%	Uncomment and use, when needed
+\arlrptno  {ARL-TN-0882}%		Uncomment and use, when needed
+\pubdate   {May 2018}%	Uncomment and use, when needed
 \arltitle  {GPU-Accelerated Symmetry Transform for Object Saliency}
 \allauthors{Jason Owens}
 \authorsA  {Jason Owens}
@@ -44,7 +44,7 @@
 \begin{createSFtwoNINEeight}
 % SFitemONE AUTOMATICALLY FILLED IN (\pubdate)
 % SFitemTWO AUTOMATICALLY FILLED IN (Final)
-  \SFitemTHREE{November 2016--April 2018}
+  \SFitemTHREE{November 2016--May 2018}
 % SFitemFOUR AUTO-FILLED WITH \arltitle DATA
 % SFitemFIVEa AUTO-FILLED WITH \UnderContract DATA
 % \SFitemFIVEb{[Grant Number here]}
@@ -90,23 +90,23 @@
 %% Start Document Content
 \section{Introduction}
 \label{sec:intro}
-A truly autonomous mobile agent needs to adapt and learn online in new environments. It simply not possible to provide all the information it will ever need ahead of time. In particular, an agent may encounter new objects it's never seen before. Therefore, the ability to detect these potentially novel objects is necessary for both recognition and continuous learning. While the larger task of continuous online learning is outside the scope of this particular note, it serves to define the context for an object saliency measure.
+A truly autonomous mobile agent needs to adapt and learn online in new environments. It is simply not possible to provide all the information it will ever need ahead of time. In particular, an agent may encounter new objects it has never seen before. Therefore, the ability to detect these potentially novel objects is necessary for both recognition and continuous learning. While the larger task of continuous online learning is outside the scope of this particular note, it serves to define the context for an object saliency measure.
 
-Finding salient object candidates in arbitrary natural images is a problem in computer vision and robotic perception that has yet to be solved. There are many ways this challenge is currently approached: 1) scan the entire image, at multiple scales, with some kind of object recognition algorithm, generating a heat map indicating the score or probability of a known, detected object (\eg sliding window); 2) propose a smaller set of likely object regions based on some engineered or learned features of the image (\eg edge boxes\cite{zitnick_edge_2014}, geodesic object proposals\cite{krahenbuhl_geodesic_2014}, objectness); 3) compute a segmentation of the image to propose object-like regions; or 4) learn a saliency function to predict regions of the image that may contain objects.
+Finding salient object candidates in arbitrary natural images is a problem in computer vision and robotic perception that has yet to be solved. There are many ways this challenge is currently approached: 1) scan the entire image, at multiple scales, with some kind of object recognition algorithm, generating a heat map indicating the score or probability of a known, detected object (\eg sliding window); 2) propose a smaller set of likely object regions based on some engineered or learned features of the image (\eg edge boxes\cite{zitnick_edge_2014}, geodesic object proposals\cite{krahenbuhl_geodesic_2014}, objectness\cite{alexe_measuring_2012}); 3) compute a segmentation of the image to propose object-like regions; or 4) learn a saliency function to predict regions of the image that may contain objects.
 
-In recent years and in combination with advanced deep learning systems for object recognition tasks, the use of some kind of object proposal algorithm has become a de facto standard. Since object proposal algorithms produce a significantly smaller number of image regions to test than almost any other mechanism (\eg sliding window), they are used to speed up existing detection algorithms by reducing the number of times an object model must be checked. The main idea for many proposal algorithms is to either engineer or train a detector to respond to what has been called the "objectness" of a region (\ie how well the pixels within the region correspond to the projection of an object on the image plane within the bounds of the region). Object aspects often include such properties as closed contours, convexity, and compactness \cite{koffka_principles_1935}. In the image domain, the contours can often be reflected in the edges derived from the image gradient.
+In recent years and in combination with advanced deep learning systems for object recognition tasks, the use of some kind of object proposal algorithm has become a de facto standard. Since object proposal algorithms produce a significantly smaller number of image regions to test than almost any other mechanism (\eg sliding window), they are used to speed up existing detection algorithms by reducing the number of times an object model must be checked. The main idea for many proposal algorithms is to either engineer or train a detector to respond to what has been called the ``objectness'' of a region (\ie how well the pixels within the region correspond to the projection of an object on the image plane within the bounds of the region). Object aspects often include such properties as closed contours, convexity, and compactness \cite{koffka_principles_1935}. In the image domain, the contours can often be reflected in the edges derived from the image gradient.
 
 However, processing image contours without any additional information (\eg learning an object contour prior) often yields undesirable results, with many proposals that do not represent an object. When we discuss objectness, we usually care about whole physical objects we can pick up (box of cereal, phone, pencil, flashlight, coffee mug) and not the aspects of an object's appearance that may also provide strong gradient edge responses (\eg logos or pictures on a cereal box).
 
-In 1992, Reisfeld and Yeshurun proposed the use of a symmetry transform operator\cite{reisfeld_robust_1992} in the image domain for use as an attentional operator. Since symmetry is considered a strong indicator of an object with shape\cite{dickinson_symmetry_2013}, it's reasonable to conclude that regions exhibiting strong symmetry are likely to contain objects of interest.
+In 1992, Reisfeld and Yeshurun proposed the use of a symmetry transform operator\cite{reisfeld_robust_1992} in the image domain for use as an attentional operator. Since symmetry is considered a strong indicator of an object with shape\cite{dickinson_symmetry_2013}, it is reasonable to conclude that regions exhibiting strong symmetry are likely to contain objects of interest.
 
 Reisfeld showed that by extracting contours from the symmetry magnitude and selecting local maxima, it was possible to compute attention keypoints that indicated important features of the image. For example, \arlfig{fig:salient} shows an example from Reisfeld et al. \cite{reisfeld_context_1995} where selecting the maximum output of the radial symmetry transform produces keypoints for the face of Nixon and the forehead of Elvis, as well as several interesting points on the flags.
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=0.7\linewidth]{Introduction/elvis.png}
-\caption{\label{fig:salient}
-Salient keypoint extraction using symmetry magnitude, reproduced from Reisfeld et al.\cite{reisfeld_context_1995} Reprinted by permission from: Springer Nature, International Journal of Computer Vision, Reisfeld et al., \copyright 1995}
+\caption[Salient keypoint extraction using symmetry magnitude.]{\label{fig:salient}
+Salient keypoint extraction using symmetry magnitude, reproduced from Reisfeld et al.\cite{reisfeld_context_1995} (Reprinted by permission from: Springer Nature, International Journal of Computer Vision, Reisfeld et al., \copyright 1995).}
 \end{figure}
 
 Kootstra et al. have focused on the use of Gestalt features specifically for attention and segmentation of known objects\cite{kootstra_using_2010,kootstra_gestalt_2011}, exploiting and expanding on the concepts put forth by Reisfeld\footnote{Kootstra's work, in fact, was the inspiration for this investigation into implementing and parallelizing the symmetry transform for use in object saliency and proposal.}. They found that while the symmetry informed the saliency and object proposal detection, their strong assumption that objects rest on (and protrude from) dominant planes proved the most useful at predicting object presence. 
@@ -153,11 +153,11 @@ We can then define the overall output of the symmetry transform as:
 \begin{figure}[ht]
 \centering
 \includegraphics[width=0.6\linewidth]{figures/pixel_contributions.pdf}
-\caption{\label{fig:pixel-contr}
-Illustration of the geometry and quantities involved in computing pixel pair contributions for the image gradient symmetry around point \(p\)}
+\caption[Illustration of the geometry and quantities involved in computing pixel pair contributions.]{\label{fig:pixel-contr}
+Illustration of the geometry and quantities involved in computing pixel pair contributions for the image gradient symmetry around point \(p\).}
 \end{figure}
 
-Note that in the original paper, Reisfeld et al. justify using the logarithm of the gradient magnitude to reduce the contribution of stronger gradients and makes the correlation measure (\(C(i,j)\)) less sensitive to stronger edges \cite{reisfeld_context_1995}. Also note that the 2-D Gaussian function used in the distance function is circular; Reisfeld points out that this can be modified to emphasize elliptical features. In addition, he defines a modified symmetry magnitude he calls \emph{radial symmetry} that emphasizes symmetries that are perpendicular to the primary symmetry direction (\ie \(\phi(p)\)):
+Note that in the original paper, Reisfeld et al. justify using the logarithm of the gradient magnitude to reduce the contribution of stronger gradients and make the correlation measure (\(C(i,j)\)) less sensitive to stronger edges \cite{reisfeld_context_1995}. Also note that the 2-D Gaussian function used in the distance function is circular; Reisfeld points out that this can be modified to emphasize elliptical features. In addition, he defines a modified symmetry magnitude he calls \emph{radial symmetry} that emphasizes symmetries that are perpendicular to the primary symmetry direction (\ie \(\phi(p)\)):
 
 \[ RS_\sigma(p) = \sum_{(i,j) \in \Gamma(p)} C(i,j) \sin^2 \left(\psi(i,j) - \phi(i,j)\right). \] 
 
@@ -165,7 +165,7 @@ An important aspect of this function is to note that the \(\sym\) value must alr
 
 \section{Computational Approach}
 \label{sec:computational}
-From the mathematical definition of the symmetry transform, we can see that there are no mutual data dependencies between pixels given the gradient image; in other words, the problem is embarrassingly parallel. Each pixel \emph{does} depend on a neighborhood (defined both by equation \ref{eq:dist} and \(\Gamma(\cdot)\)), but \(\sym\) does not need values computed by any other neighboring pixel. We can therefore compute the symmetry transform for each pixel independently, which suggests that an adaptation of the algorithm for \gls{gpu} computation should be relatively straightforward. 
+From the mathematical definition of the symmetry transform, we can see that there are no mutual data dependencies between pixels given the gradient image; in other words, the problem is embarrassingly parallel. Each pixel \emph{does} depend on a neighborhood (defined both by \arleq{eq:dist} and \(\Gamma(\cdot)\)), but \(\sym\) does not need values computed by any other neighboring pixel. We can therefore compute the symmetry transform for each pixel independently, which suggests that an adaptation of the algorithm for \gls{gpu} computation should be relatively straightforward. 
 
 In this section, we present the basic sequential algorithm (with no optimizations), and then discuss how it was readily adapted for computation on a \gls{gpu}. 
 
@@ -219,13 +219,13 @@ Algorithm \ref{alg:sym} represents the pseudocode for the symmetry transform, wh
 \end{algorithm}
 
 \pagebreak
-There are several specific aspects we highlight in this formulation. While Reisfeld leaves the definition of \(\Gamma(p)\) open to \emph{all} symmetric points surrounding \(p\), the effects of points further away are clearly limited by the distance function \(D_\sigma(i,j)\) (\ie \arleq{eq:dist}). In this code, we explicitly limit the bounds of the per-pixel neighbor iteration to a square region defined by the \(\pmin\) and \(\pmax\), with sides equal to \(2\rho = 5\sigma\), see lines \ref{ln:gamma}--\ref{ln:gamma2}. This follows the implementation details given by Kootstra et al.\cite{kootstra_using_2010}, where they use default minimum and maximum radii values of 7 and 17, respectively. In this implementation, \(\sigma\) is given as a parameter to the function to control the scale, and we compute the max radius as \(\rho\) directly from \(\sigma\). Also, note that the \(\operatorname{argmax}\) is implemented inline in lines \ref{ln:argmax}--\ref{ln:argmax2} to avoid running another loop to compute the maximum. Finally, we only have to process \emph{half} the neighborhood region, since by definition the other half of the points are symmetric to the first half; line \ref{ln:break} shows where this early termination occurs. 
+There are several specific aspects we highlight in this formulation. While Reisfeld leaves the definition of \(\Gamma(p)\) open to \emph{all} symmetric points surrounding \(p\), the effects of points further away are clearly limited by the distance function \(D_\sigma(i,j)\) (\ie \arleq{eq:dist}). In this code, we explicitly limit the bounds of the per-pixel neighbor iteration to a square region defined by the \(\pmin\) and \(\pmax\), with sides equal to \(2\rho = 5\sigma\), see Lines \ref{ln:gamma}--\ref{ln:gamma2}. This follows the implementation details given by Kootstra et al.\cite{kootstra_using_2010}, where they use default minimum and maximum radii values of 7 and 17, respectively. In this implementation, \(\sigma\) is given as a parameter to the function to control the scale, and we compute the max radius as \(\rho\) directly from \(\sigma\). Also, note that the \(\operatorname{argmax}\) is implemented inline in Lines \ref{ln:argmax}--\ref{ln:argmax2} to avoid running another loop to compute the maximum. Finally, we only have to process \emph{half} the neighborhood region, since by definition the other half of the points are symmetric to the first half; Line \ref{ln:break} shows where this early termination occurs. 
 
 
 \subsection{Parallel Adaptation}
 \label{sec:parallel}
 
-To adapt Alg. \ref{alg:sym} for the GPU, we simply extract lines \ref{ln:par}--\ref{ln:par2} and convert them to an appropriate \gls{gpu} kernel function (see the code listing in Alg. \ref{alg:kernel}). In our implementation, we use the CUDA language for NVIDIA \glspl{gpu} (the most common discrete \gls{gpu} in our environment). We do not claim any particular ingenuity in converting this problem to a parallel implementation; we simply document the implementation and show the performance benefits. 
+To adapt Alg. \ref{alg:sym} for the GPU, we simply extract Lines \ref{ln:par}--\ref{ln:par2} and convert them to an appropriate \gls{gpu} kernel function (see the code listing in Alg. \ref{alg:kernel}). In our implementation, we use the CUDA language for NVIDIA \glspl{gpu} (the most common discrete \gls{gpu} in our environment). We do not claim any particular ingenuity in converting this problem to a parallel implementation; we simply document the implementation and show the performance benefits. 
 
 \Needspace{0.8\textheight}
 \begin{algorithm}[!htp]
@@ -233,7 +233,7 @@ To adapt Alg. \ref{alg:sym} for the GPU, we simply extract lines \ref{ln:par}--\
 \lstinputlisting[numbers=left,style=cuda,firstline=146,lastline=198]{../src/symmetry_transform.cu}
 \end{algorithm}
 
-Note that it is impossible to get full utilization of the thread warps near the edges of the image, since some threads will be sitting idle due to the \texttt{valid\_pt} checks ensuring we don't process pixels outside the image bounds. Also note in lines 30--31 that we apply the modification from Kootstra et al.\cite{kootstra_using_2010} that ignores the gradients near the center of the point, to help emphasize the gradients at the given radius (\(\sigma\)); this produces a "no computation zone" that causes portions of thread warps to become idle, due to the \gls{simd} nature of the CUDA computation model.
+Note that it is impossible to get full utilization of the thread warps near the edges of the image, since some threads will be sitting idle due to the \texttt{valid\_pt} checks ensuring we do not process pixels outside the image bounds. Also note in Lines 30--31 that we apply the modification from Kootstra et al.\cite{kootstra_using_2010} that ignores the gradients near the center of the point, to help emphasize the gradients at the given radius (\(\sigma\)); this produces a ``no computation zone'' that causes portions of thread warps to become idle, due to the \gls{simd} nature of the CUDA computation model.
 
 The kernel is then called with a default block size of \(16\times16\). No optimizations have yet been implemented for device-dependent occupancies or shared memory usage. Both adjustments could improve overall performance, but require additional complexity in the kernel and the host calling function. 
 
@@ -242,19 +242,19 @@ The kernel is then called with a default block size of \(16\times16\). No optimi
 \subsection{Performance}
 \label{sec:performance}
 
-The performance difference between single \gls{cpu} and \gls{gpu} implementations is staggering. As \arlfig{fig:perf} shows using a logarithmic-scale y axis, there are 2 orders of magnitude improvement in execution time for the GPU version, primarily due to the massive parallelism on the GPU and the virtually nonexistent dependencies between pixel values (\ie no reductions necessary, and no waiting), even with idle threads due to the internal "no computation zone." 
+The performance difference between single \gls{cpu} and \gls{gpu} implementations is staggering. As \arlfig{fig:perf} shows using a logarithmic-scale y axis, there are 2 orders of magnitude improvement in execution time for the GPU version, primarily due to the massive parallelism on the GPU and the virtually nonexistent dependencies between pixel values (\ie no reductions necessary, and no waiting), even with idle threads due to the internal ``no computation zone.''
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=0.6\linewidth]{figures/cpu_v_gpu.png}
-\caption{\label{fig:perf}
-Single \gls{cpu} vs. \gls{gpu} performance comparison. Note that there are 2 orders of magnitude improvement between the \gls{gpu} and the \gls{cpu} runtime. Tests were performed on an Intel 4th-Gen Core i7 2.9 GHz processor and NVidia Quadro M3000M \gls{gpu} with 768 CUDA cores}
+\caption[Single CPU vs GPU performance comparison.]{\label{fig:perf}
+Single \gls{cpu} vs. \gls{gpu} performance comparison. Note that there are 2 orders of magnitude improvement between the \gls{gpu} and the \gls{cpu} runtime. Tests were performed on an Intel 4th-Gen Core i7 2.9 GHz processor and NVidia Quadro M3000M \gls{gpu} with 768 CUDA cores.}
 \end{figure}
 
 \subsection{Transform Output}
 \label{sec:transform-output}
 
-For our purposes, we are much less interested in the symmetry direction as we are in the symmetry magnitude (as discussed in the introduction). \Arlfig{fig:ex_xforms} shows example output from the implemented symmetry transform as well as simple "feature" detection output derived from the symmetry magnitude images. A quick and dirty method for finding features is to use non-maximum suppression to find local maxima (and then suppress any other maxima within a given radius). To show the usefulness of the transform on natural images, we implemented a simple detector that computes an image pyramid, runs the symmetry transform on each layer, and then merges the result into a single full-scale magnitude image in order to find local maxima. In the results shown, our detector uses a suppression radius of 15 pixels. 
+For our purposes, we are much less interested in the symmetry direction as we are in the symmetry magnitude (as discussed in the introduction). \Arlfig{fig:ex_xforms} shows example output from the implemented symmetry transform as well as simple ``feature'' detection output derived from the symmetry magnitude images. A quick and dirty method for finding features is to use non-maximum suppression to find local maxima (and then suppress any other maxima within a given radius). To show the usefulness of the transform on natural images, we implemented a simple detector that computes an image pyramid, runs the symmetry transform on each layer, and then merges the result into a single full-scale magnitude image in order to find local maxima. In the results shown, our detector uses a suppression radius of 15 pixels. 
 
 \Needspace{0.8\textheight}
 \begin{figure}[ht]
@@ -279,7 +279,7 @@ For our purposes, we are much less interested in the symmetry direction as we ar
 \begin{subfigure}[]{0.25\linewidth}\label{fig:kit_feats_4}\includegraphics[width=\linewidth]{figures/kitchen_feats_9}\end{subfigure}%
 \begin{subfigure}[]{0.25\linewidth}\label{fig:meet_smag_4}\includegraphics[width=\linewidth]{figures/meeting_smag_9}\end{subfigure}%
 \begin{subfigure}[]{0.25\linewidth}\label{fig:meet_feats_4}\includegraphics[width=\linewidth]{figures/meeting_feats_9}\end{subfigure}
-\caption{Five consecutive images each of the \texttt{kitchen\_small} (left pair) and \texttt{meeting\_small} (right pair) scenes from the \texttt{rgbd\_scenes} data set\cite{henry_rgb-d_2012}. For each pair, the computed symmetry magnitude is shown on the left, and the local maxima found using non-maximum suppression is shown on the right, using radius 15}
+\caption[Five consecutive images of two scenes from the \texttt{rgbd\_scenes} data set.]{Five consecutive images each of the \texttt{kitchen\_small} (left pair) and \texttt{meeting\_small} (right pair) scenes from the \texttt{rgbd\_scenes} data set\cite{henry_rgb-d_2012}. For each pair, the computed symmetry magnitude is shown on the left, and the local maxima found using non-maximum suppression is shown on the right, using radius 15.}
 \label{fig:ex_xforms}
 \end{figure}
 
